@@ -10,9 +10,12 @@ import data
 def get_dashboard_title(dashboard_json):
     return dashboard_json.get("dashboard", {}).get("title", "")
 
-def remove_meta_section(dashboard_json):
+def convert_to_import_format(dashboard_json):
     if "meta" in dashboard_json:
         del dashboard_json["meta"]
+    if "id" in dashboard_json["dashboard"]:
+        del dashboard_json["dashboard"]["id"]
+    return dashboard_json["dashboard"]
 
 if data.url == "":
     print("Не указан { url } в data.py")
@@ -54,14 +57,14 @@ def main():
 
         if response.status_code == 200:
             dashboard_json = response.json()
-            remove_meta_section(dashboard_json)
             dashboard_title = get_dashboard_title(dashboard_json)
             if not dashboard_title:
                 print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
                 dashboard_title = "dashboard"
             filename = f"dashboard_{dashboard_title}.json"
+            dashboard_json_converted = convert_to_import_format(dashboard_json)
             with open(os.path.join(output_folder, filename), "w") as outfile:
-                json.dump(dashboard_json, outfile, indent=4)
+                json.dump(dashboard_json_converted, outfile, indent=4)
                 print(f"Дашборд {dashboard} успешно экспортирован как {filename}.")
         else:
             print(f"Ошибка при экспорте дашборда: {response.status_code} {response.text}")
