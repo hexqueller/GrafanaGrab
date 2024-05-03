@@ -10,6 +10,10 @@ import data
 def get_dashboard_title(dashboard_json):
     return dashboard_json.get("dashboard", {}).get("title", "")
 
+def remove_meta_section(dashboard_json):
+    if "meta" in dashboard_json:
+        del dashboard_json["meta"]
+
 if data.url == "":
     print("Не указан { url } в data.py")
     exit()
@@ -50,6 +54,7 @@ def main():
 
         if response.status_code == 200:
             dashboard_json = response.json()
+            remove_meta_section(dashboard_json)
             dashboard_title = get_dashboard_title(dashboard_json)
             if not dashboard_title:
                 print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
