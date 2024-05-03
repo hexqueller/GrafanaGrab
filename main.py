@@ -2,6 +2,9 @@ from sys import argv, exit
 import requests
 import json
 import os
+import shutil
+import tarfile
+from datetime import datetime
 import data
 
 if data.url == "":
@@ -52,6 +55,20 @@ def main():
             error_count += 1
 
     print(f"\nДашборды успешно экспортированны!\nУспешно: {len(uids)}\nОшибок: {error_count}")
+
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    now = datetime.now()
+    date_format = now.strftime("%d-%m-%Y")
+    archive_name = f"dashboards_{date_format}.tar.gz"
+    archive_path = os.path.join(script_dir, archive_name)
+
+    with tarfile.open(archive_path, "w:gz") as tar:
+        tar.add(output_folder, arcname=os.path.basename(output_folder))
+
+    print(f"\nАрхив {archive_name} успешно создан.")
+
+    shutil.rmtree(output_folder)
+    print("Очистка завершена!")
 
 if __name__ == "__main__":
     main()
