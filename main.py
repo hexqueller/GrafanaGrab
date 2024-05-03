@@ -73,12 +73,16 @@ def main():
     now = datetime.now()
     date_format = now.strftime("%d-%m-%Y")
     archive_name = f"dashboards_{date_format}.tar.gz"
-    archive_path = os.path.join(script_dir, archive_name)
 
-    with tarfile.open(archive_path, "w:gz") as tar:
+    if data.save == "":
+        data.save = os.path.join(script_dir, archive_name)
+    else:
+        data.save = data.save + "/" + archive_name
+
+    with tarfile.open(data.save, "w:gz") as tar:
         tar.add(output_folder, arcname=os.path.basename(output_folder))
 
-    print(f"\nАрхив {archive_name} успешно создан.")
+    print(f"\nАрхив {data.save} успешно создан.")
 
     shutil.rmtree(output_folder)
     print("Очистка завершена!")
