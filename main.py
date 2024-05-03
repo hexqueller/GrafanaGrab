@@ -16,7 +16,7 @@ if data.key == "":
         exit()
 
 def main():
-
+    error_count = 0
     headers = {
         "Authorization": f"Bearer {data.key}",
         "Content-Type": "application/json",
@@ -49,8 +49,9 @@ def main():
                 print(f"Дашборд {dashboard} успешно экспортирован.")
         else:
             print(f"Ошибка при экспорте дашборда: {response.status_code} {response.text}")
+            error_count += 1
 
-    print(f"Дашборды успешно экспортированны!\nКоличество: {len(uids)}")
+    print(f"\nДашборды успешно экспортированны!\nУспешно: {len(uids)}\nОшибок: {error_count}")
 
 if __name__ == "__main__":
     main()
