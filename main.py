@@ -7,6 +7,9 @@ import tarfile
 from datetime import datetime
 import data
 
+def get_dashboard_title(dashboard_json):
+    return dashboard_json.get("dashboard", {}).get("title", "")
+
 if data.url == "":
     print("Не указан { url } в data.py")
     exit()
@@ -47,9 +50,14 @@ def main():
 
         if response.status_code == 200:
             dashboard_json = response.json()
-            with open(os.path.join(output_folder, f"dashboard_{dashboard}.json"), "w") as outfile:
+            dashboard_title = get_dashboard_title(dashboard_json)
+            if not dashboard_title:
+                print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
+                dashboard_title = "dashboard"
+            filename = f"dashboard_{dashboard_title}.json"
+            with open(os.path.join(output_folder, filename), "w") as outfile:
                 json.dump(dashboard_json, outfile, indent=4)
-                print(f"Дашборд {dashboard} успешно экспортирован.")
+                print(f"Дашборд {dashboard} успешно экспортирован как {filename}.")
         else:
             print(f"Ошибка при экспорте дашборда: {response.status_code} {response.text}")
             error_count += 1
