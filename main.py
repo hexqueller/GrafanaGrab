@@ -1,6 +1,7 @@
 from sys import argv, exit
 import requests
 import json
+import os
 import data
 
 if data.url == "":
@@ -14,33 +15,42 @@ if data.key == "":
         print("Ключ не прописан в data.py или не указан в качестве аргумента")
         exit()
 
-headers = {
-    "Authorization": f"Bearer {data.key}",
-    "Content-Type": "application/json",
-}
+def main():
 
-response = requests.get(f"{data.url}/api/search", headers=headers)
+    headers = {
+        "Authorization": f"Bearer {data.key}",
+        "Content-Type": "application/json",
+    }
 
-if response.status_code == 200:
-    uids = [dashboard["uid"] for dashboard in response.json()]
-else:
-    print(f"Ошибка при получении дашборда: {response.status_code}")
-    exit()
-
-
-for dashboard in uids:
-    response = requests.get(
-        f"{data.url}/api/dashboards/uid/{dashboard}",
-        headers=headers,
-    )
+    response = requests.get(f"{data.url}/api/search", headers=headers)
 
     if response.status_code == 200:
-        dashboard_json = response.json()
-        with open(f"dashboard_{dashboard}.json", "w") as outfile:
-            json.dump(dashboard_json, outfile, indent=4)
-            print(f"Дашборд {dashboard} успешно экспортирован.")
+        uids = [dashboard["uid"] for dashboard in response.json()]
+    elif response.status_code == 401:
+        print(f"Неудачная авторизация ({response.status_code}).\nПроверьте ключ!")
+        exit()
     else:
-        print(f"Ошибка при экспорте дашборда: {response.status_code} {response.text}")
+        print(f"Ошибка {response.status_code}")
+        exit()
 
+    output_folder = "/tmp/dashboards"
+    os.makedirs(output_folder, exist_ok=True)
 
-print(f"Дашборды успешно экспортированны!\nКоличество: {len(uids)}")
+    for dashboard in uids:
+        response = requests.get(
+            f"{data.url}/api/dashboards/uid/{dashboard}",
+            headers=headers,
+        )
+
+        if response.status_code == 200:
+            dashboard_json = response.json()
+            with open(os.path.join(output_folder, f"dashboard_{dashboard}.json"), "w") as outfile:
+                json.dump(dashboard_json, outfile, indent=4)
+                print(f"Дашборд {dashboard} успешно экспортирован.")
+        else:
+            print(f"Ошибка при экспорте дашборда: {response.status_code} {response.text}")
+
+    print(f"Дашборды успешно экспортированны!\nКоличество: {len(uids)}")
+
+if __name__ == "__main__":
+    main()
