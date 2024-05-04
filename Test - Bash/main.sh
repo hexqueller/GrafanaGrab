@@ -26,8 +26,11 @@ fi
 OUTPUT_FOLDER="/tmp/dashboards"
 mkdir -p "$OUTPUT_FOLDER"
 
+# Define headers
+HEADERS='{ "Authorization": "Bearer '$KEY'", "Content-Type": "application/json" }'
+
 # Get dashboards
-RESPONSE=$(curl -s -H "$HEADERS" -w "%{http_code}" -o /dev/null "$URL/api/search" -X GET)
+RESPONSE=$(curl -v -H "$HEADERS" -w "%{http_code}" -o /dev/null "$URL/api/search" -X GET 2>/dev/null)
 if [ "$RESPONSE" != "200" ]; then
     echo "Failed to get dashboards: HTTP status code $RESPONSE"
     exit 1
