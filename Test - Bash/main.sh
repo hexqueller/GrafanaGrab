@@ -11,6 +11,11 @@ URL=$(awk -F '=' '/url/{print $2}' config.ini)
 KEY=$(awk -F '=' '/key/{print $2}' config.ini)
 SAVE=$(awk -F '=' '/save/{print $2}' config.ini)
 
+echo "Debug:"
+echo "URL: $URL"
+echo "KEY: $KEY"
+echo "SAVE: $SAVE"
+
 # Check if URL and KEY are set
 if [ -z "$URL" ]; then
     echo "URL is not set in config.ini"
@@ -30,7 +35,7 @@ mkdir -p "$OUTPUT_FOLDER"
 HEADERS='{ "Authorization": "Bearer '$KEY'", "Content-Type": "application/json" }'
 
 # Get dashboards
-RESPONSE=$(curl -v -H "$HEADERS" -w "%{http_code}" -o /dev/null "$URL/api/search" -X GET 2>/dev/null)
+RESPONSE=$(curl -v -s -H "$HEADERS" -o /dev/null -w "%{http_code}" $URL/api/search -X GET)
 if [ "$RESPONSE" != "200" ]; then
     echo "Failed to get dashboards: HTTP status code $RESPONSE"
     exit 1
