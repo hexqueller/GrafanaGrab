@@ -1,80 +1,36 @@
 #!/bin/bash
 
-# Check if config.ini exists and source it
-if [ ! -f config.ini ]; then
-    echo "config.ini not found!"
-    exit 1
+# URL и ключ для Grafana API
+API_URL=""
+API_KEY=""
+
+# Путь для сохранения Dashboard
+SAVE_PATH="."
+
+# Проверка и создание папки для сохранения, если она не существует
+if [ ! -d "$SAVE_PATH" ]; then
+  mkdir -p "$SAVE_PATH"
 fi
 
-# Read config.ini
-URL=$(awk -F '=' '/url/{print $2}' config.ini)
-KEY=$(awk -F '=' '/key/{print $2}' config.ini)
-SAVE=$(awk -F '=' '/save/{print $2}' config.ini)
+# Получение списка всех Dashboard
+DASHBOARDS=$(curl -s -H "Authorization: Bearer ${API_KEY}" "${API_URL}/search?query=&type=dash-db" | jq -r '.[] | @base64')
 
-echo "Debug:"
-echo "URL: $URL"
-echo "KEY: $KEY"
-echo "SAVE: $SAVE"
+# Скачивание Dashboard
+for DASHBOARD_ENCODED in $DASHBOARDS; do
+  _DASHBOARD_JSON=$(echo "$DASHBOARD_ENCODED" | base64 --decode)
+  DASHBOARD_ID=$(echo "$_DASHBOARD_JSON" | jq -r '.uid')
+  DASHBOARD_TITLE=$(echo "$_DASHBOARD_JSON" | jq -r '.title')
 
-# Check if URL and KEY are set
-if [ -z "$URL" ]; then
-    echo "URL is not set in config.ini"
-    exit 1
-fi
+  if [ -z "$DASHBOARD_TITLE" ]; then
+    echo "Пропуск Dashboard с пустым заголовком: ${DASHBOARD_ID}"
+    continue
+  fi
 
-if [ -z "$KEY" ]; then
-    echo "KEY is not set in config.ini"
-    exit 1
-fi
+  DASHBOARD_URL="${API_URL}/dashboards/uid/${DASHBOARD_ID}"
+  DASHBOARD_FILE="${SAVE_PATH}/${DASHBOARD_TITLE}.json"
 
-# Create output folder
-OUTPUT_FOLDER="/tmp/dashboards"
-mkdir -p "$OUTPUT_FOLDER"
-
-# Define headers
-HEADERS='{ "Authorization": "Bearer '$KEY'", "Content-Type": "application/json" }'
-
-# Get dashboards
-RESPONSE=$(curl -v -s -H "$HEADERS" -o /dev/null -w "%{http_code}" $URL/api/search -X GET)
-if [ "$RESPONSE" != "200" ]; then
-    echo "Failed to get dashboards: HTTP status code $RESPONSE"
-    exit 1
-fi
-
-# Loop through dashboards and export them
-UIDS=$(echo $RESPONSE | jq -r '.[] | .uid')
-ERROR_COUNT=0
-for DASHBOARD in $UIDS; do
-    RESPONSE=$(curl -s -H "$HEADERS" "$URL/api/dashboards/uid/$DASHBOARD")
-    if [ "$(echo $RESPONSE | jq -r '.status')" != "success" ]; then
-        echo "Failed to export dashboard: $(echo $RESPONSE | jq -r '.message')"
-        ERROR_COUNT=$((ERROR_COUNT+1))
-        continue
-    fi
-    TITLE=$(echo $RESPONSE | jq -r '.dashboard.title')
-    if [ -z "$TITLE" ]; then
-        TITLE="dashboard"
-        echo "Failed to get title for dashboard $DASHBOARD. Using default title."
-    fi
-    FILENAME="dashboard_$TITLE.json"
-    echo $RESPONSE | jq -r '.dashboard | del(.id, .meta)' > "$OUTPUT_FOLDER/$FILENAME"
-    echo "Dashboard $DASHBOARD successfully exported as $FILENAME."
+  echo "Скачивание Dashboard: ${DASHBOARD_TITLE}"
+  curl -s -H "Authorization: Bearer ${API_KEY}" "${DASHBOARD_URL}" > "${DASHBOARD_FILE}"
 done
 
-echo -e "\nDashboards successfully exported!\nSuccessful: $(($UIDS-ERROR_COUNT))\nErrors: $ERROR_COUNT"
-
-# Create archive
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
-DATE_FORMAT=$(date +"%d-%m-%Y")
-ARCHIVE_NAME="dashboards_$DATE_FORMAT.tar.gz"
-if [ -z "$SAVE" ]; then
-    SAVE="$SCRIPT_DIR/$ARCHIVE_NAME"
-else
-    SAVE="$SAVE/$ARCHIVE_NAME"
-fi
-tar -czf "$SAVE" -C "$OUTPUT_FOLDER" .
-echo -e "\nArchive $SAVE successfully created."
-
-# Clean up
-rm -rf "$OUTPUT_FOLDER"
-echo "Cleanup completed!"
+echo "Все Dashboard скачаны"
