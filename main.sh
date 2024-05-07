@@ -11,6 +11,11 @@ if [ ! -d "$SAVE_PATH" ]; then
   mkdir -p "$SAVE_PATH"
 fi
 
+TMP_DIR="/tmp/dashboards"
+if [ ! -d "$TMP_DIR" ]; then
+  mkdir -p "$TMP_DIR"
+fi
+
 convert_to_import_format() {
   DASHBOARD_JSON=$(echo "$1" | jq '.')
   DASHBOARD_JSON=$(echo "$DASHBOARD_JSON" | jq 'del(.meta)')
@@ -31,16 +36,25 @@ for DASHBOARD_ENCODED in $DASHBOARDS; do
   fi
 
   DASHBOARD_URL="${API_URL}/dashboards/uid/${DASHBOARD_ID}"
-  DASHBOARD_FILE="${SAVE_PATH}/${DASHBOARD_TITLE}.json"
+  DASHBOARD_FILE="${TMP_DIR}/${DASHBOARD_TITLE}.json"
 
   echo "Скачивание Dashboard: ${DASHBOARD_TITLE}"
   DASHBOARD_JSON=$(curl -s -H "Authorization: Bearer ${API_KEY}" "${DASHBOARD_URL}")
 
-  echo "Конвертация Dashboard: ${DASHBOARD_TITLE}"
   CONVERTED_DASHBOARD=$(convert_to_import_format "$DASHBOARD_JSON")
 
-  echo "Сохранение Dashboard в формате для импорта: ${DASHBOARD_TITLE}"
   echo "$CONVERTED_DASHBOARD" > "${DASHBOARD_FILE}"
 done
 
 echo "Все Dashboard скачаны и конвертированы"
+
+# Создание архива
+ARCHIVE_NAME="dashboards_$(date +%d-%m-%Y).tar.gz"
+tar -czf "${SAVE_PATH}/${ARCHIVE_NAME}" -C "${TMP_DIR}" .
+
+echo "Архив создан: ${ARCHIVE_NAME}"
+
+# Удаление папки /tmp/dashboards
+rm -rf "${TMP_DIR}"
+
+echo "Очистка завершена!"
