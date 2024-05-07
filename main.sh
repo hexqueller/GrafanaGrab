@@ -1,11 +1,8 @@
 #!/bin/bash
 
-##################
-### Переменные ###
 API_URL="" # Ссылка на Grafana в формате http://grafana:3000/api
 API_KEY="" # Ключ сервисного аккаунта
-SAVE_PATH="." # Путь сохранения
-##################
+SAVE_PATH="."
 
 if [ ! -d "$SAVE_PATH" ]; then
   mkdir -p "$SAVE_PATH"
@@ -45,16 +42,11 @@ for DASHBOARD_ENCODED in $DASHBOARDS; do
 
   echo "$CONVERTED_DASHBOARD" > "${DASHBOARD_FILE}"
 done
-
 echo "Все Dashboard скачаны и конвертированы"
 
-# Создание архива
 ARCHIVE_NAME="dashboards_$(date +%d-%m-%Y).tar.gz"
 tar -czf "${SAVE_PATH}/${ARCHIVE_NAME}" -C "${TMP_DIR}" .
-
 echo "Архив создан: ${ARCHIVE_NAME}"
 
-# Удаление папки /tmp/dashboards
 rm -rf "${TMP_DIR}"
-
 echo "Очистка завершена!"
