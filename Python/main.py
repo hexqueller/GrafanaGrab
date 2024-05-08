@@ -1,11 +1,11 @@
 import config
 import parse
+import logging0
 
 from sys import argv, exit
 import requests
 import json
 import os
-import shutil
 import tarfile
 from datetime import datetime
 
@@ -19,6 +19,16 @@ if config.key == "":
     except IndexError:
         print("Ключ не прописан в config.py или не указан в качестве аргумента")
         exit()
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+now = datetime.now()
+date_format = now.strftime("%d-%m-%Y")
+archive_name = f"dashboards_{date_format}.tar.gz"
+
+if config.save == "":
+    config.save = os.path.join(script_dir, archive_name)
+else:
+    config.save = config.save + "/" + archive_name
 
 def main():
     error_count = 0
@@ -38,8 +48,7 @@ def main():
         print(f"Ошибка {response.status_code}")
         exit()
 
-    output_folder = "/tmp/dashboards"
-    os.makedirs(output_folder, exist_ok=True)
+    output_folder, log_file = logging0.create_dir(script_dir)
 
     for dashboard in uids:
         response = requests.get(
@@ -50,6 +59,7 @@ def main():
         if response.status_code == 200:
             dashboard_json = response.json()
             dashboard_title = parse.get_dashboard_title(dashboard_json) + "_ver_" + str(parse.get_dashboard_ver(dashboard_json))
+            logging0.logging(log_file, parse.get_dashboard_update_all(dashboard_json))
             if not dashboard_title:
                 print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
                 dashboard_title = "dashboard"
@@ -64,23 +74,10 @@ def main():
 
     print(f"\nДашборды успешно экспортированны!\nУспешно: {len(uids)}\nОшибок: {error_count}")
 
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    now = datetime.now()
-    date_format = now.strftime("%d-%m-%Y")
-    archive_name = f"dashboards_{date_format}.tar.gz"
-
-    if config.save == "":
-        config.save = os.path.join(script_dir, archive_name)
-    else:
-        config.save = config.save + "/" + archive_name
-
     with tarfile.open(config.save, "w:gz") as tar:
         tar.add(output_folder, arcname=os.path.basename(output_folder))
 
     print(f"\nАрхив {config.save} успешно создан.")
-
-    shutil.rmtree(output_folder)
-    print("Очистка завершена!")
 
 if __name__ == "__main__":
     main()
