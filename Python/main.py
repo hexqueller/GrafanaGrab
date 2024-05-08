@@ -1,4 +1,4 @@
-import Python.config as config
+import config
 import parse
 
 from sys import argv, exit
@@ -49,7 +49,7 @@ def main():
 
         if response.status_code == 200:
             dashboard_json = response.json()
-            dashboard_title = parse.get_dashboard_title(dashboard_json)
+            dashboard_title = parse.get_dashboard_title(dashboard_json) + "_ver_" + str(parse.get_dashboard_ver(dashboard_json))
             if not dashboard_title:
                 print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
                 dashboard_title = "dashboard"
