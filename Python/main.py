@@ -48,7 +48,7 @@ def main():
         print(f"Ошибка {response.status_code}")
         exit()
 
-    output_folder, log_file = logging0.create_dir(script_dir)
+    output_folder, log_file = logging0.create_dir(config.save[:-len(archive_name)])
 
     for dashboard in uids:
         response = requests.get(
@@ -63,7 +63,7 @@ def main():
             if not dashboard_title:
                 print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
                 dashboard_title = "dashboard"
-            filename = f"dashboard_{dashboard_title}.json"
+            filename = f"{dashboard_title}.json"
             dashboard_json_converted = parse.convert_to_import_format(dashboard_json)
             with open(os.path.join(output_folder, filename), "w") as outfile:
                 json.dump(dashboard_json_converted, outfile, indent=4)
