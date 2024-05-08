@@ -1,3 +1,6 @@
+import Python.config as config
+import parse
+
 from sys import argv, exit
 import requests
 import json
@@ -5,37 +8,26 @@ import os
 import shutil
 import tarfile
 from datetime import datetime
-import data
 
-def get_dashboard_title(dashboard_json):
-    return dashboard_json.get("dashboard", {}).get("title", "")
-
-def convert_to_import_format(dashboard_json):
-    if "meta" in dashboard_json:
-        del dashboard_json["meta"]
-    if "id" in dashboard_json["dashboard"]:
-        del dashboard_json["dashboard"]["id"]
-    return dashboard_json["dashboard"]
-
-if data.url == "":
-    print("Не указан { url } в data.py")
+if config.url == "":
+    print("Не указан { url } в config.py")
     exit()
 
-if data.key == "":
+if config.key == "":
     try:
-        data.key = argv[1]
+        config.key = argv[1]
     except IndexError:
-        print("Ключ не прописан в data.py или не указан в качестве аргумента")
+        print("Ключ не прописан в config.py или не указан в качестве аргумента")
         exit()
 
 def main():
     error_count = 0
     headers = {
-        "Authorization": f"Bearer {data.key}",
+        "Authorization": f"Bearer {config.key}",
         "Content-Type": "application/json",
     }
 
-    response = requests.get(f"{data.url}/api/search", headers=headers)
+    response = requests.get(f"{config.url}/api/search", headers=headers)
 
     if response.status_code == 200:
         uids = [dashboard["uid"] for dashboard in response.json()]
@@ -51,18 +43,18 @@ def main():
 
     for dashboard in uids:
         response = requests.get(
-            f"{data.url}/api/dashboards/uid/{dashboard}",
+            f"{config.url}/api/dashboards/uid/{dashboard}",
             headers=headers,
         )
 
         if response.status_code == 200:
             dashboard_json = response.json()
-            dashboard_title = get_dashboard_title(dashboard_json)
+            dashboard_title = parse.get_dashboard_title(dashboard_json)
             if not dashboard_title:
                 print(f"Не удалось получить заголовок дашборда для {dashboard}. Будет использовано имя по умолчанию.")
                 dashboard_title = "dashboard"
             filename = f"dashboard_{dashboard_title}.json"
-            dashboard_json_converted = convert_to_import_format(dashboard_json)
+            dashboard_json_converted = parse.convert_to_import_format(dashboard_json)
             with open(os.path.join(output_folder, filename), "w") as outfile:
                 json.dump(dashboard_json_converted, outfile, indent=4)
                 print(f"Дашборд {dashboard} успешно экспортирован как {filename}.")
@@ -77,15 +69,15 @@ def main():
     date_format = now.strftime("%d-%m-%Y")
     archive_name = f"dashboards_{date_format}.tar.gz"
 
-    if data.save == "":
-        data.save = os.path.join(script_dir, archive_name)
+    if config.save == "":
+        config.save = os.path.join(script_dir, archive_name)
     else:
-        data.save = data.save + "/" + archive_name
+        config.save = config.save + "/" + archive_name
 
-    with tarfile.open(data.save, "w:gz") as tar:
+    with tarfile.open(config.save, "w:gz") as tar:
         tar.add(output_folder, arcname=os.path.basename(output_folder))
 
-    print(f"\nАрхив {data.save} успешно создан.")
+    print(f"\nАрхив {config.save} успешно создан.")
 
     shutil.rmtree(output_folder)
     print("Очистка завершена!")
