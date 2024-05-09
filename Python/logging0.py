@@ -1,4 +1,5 @@
 import os
+import datetime
 
 def create_dir(script_dir):
     folder = "/data"
@@ -8,10 +9,14 @@ def create_dir(script_dir):
 
 def check_log_file(path):
     file = "/log.txt"
-    file_path = path+file
+    greetings = "-"*10 + "запуск " + datetime.datetime.now().strftime("%H:%M %d.%m.%Y") + "-"*10
+    file_path = path + file
     if not os.path.isfile(file_path):
         with open(file_path, 'w') as file:
-            pass
+            file.write(f"{greetings}")
+    else:
+        with open(file_path, 'a') as file:
+            file.write(f"\n\n{greetings}")
     return file_path
 
 def logging(log_file, string_to_append):
