@@ -18,8 +18,16 @@ def get_dashboard_update_by(dashboard_json):
 
 def get_dashboard_update_date(dashboard_json):
     date = dashboard_json.get("meta", {}).get("updated", "")
-    converted_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").strftime("%H:%M:%S %d-%m-%Y")
+    try:
+        converted_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").strftime("%H:%M:%S %d-%m-%Y")
+    except ValueError:
+        converted_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z").strftime("%H:%M:%S %d-%m-%Y")
     return converted_date
 
 def get_dashboard_update_all(dashboard_json):
-    return "Дашборд: " + get_dashboard_title(dashboard_json) + " Обновил: " + get_dashboard_update_by(dashboard_json) + " Дата: " + get_dashboard_update_date(dashboard_json) + " Версия: " + str(get_dashboard_ver(dashboard_json))
+    title = get_dashboard_title(dashboard_json)
+    updated_by = get_dashboard_update_by(dashboard_json)
+    updated_date = get_dashboard_update_date(dashboard_json)
+    version = f"Версия: {get_dashboard_ver(dashboard_json)}"
+    fmt = "{title:<50} {updated_by:<15} {updated_date:<20} {version:<10}"
+    return fmt.format(title=title, updated_by=updated_by, updated_date=updated_date, version=version)
