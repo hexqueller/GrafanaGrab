@@ -3,6 +3,7 @@ import http.server
 import urllib.parse
 import importlib
 import os
+import datetime
 
 # Путь к папке /data
 data_folder = config.save + "/data"
@@ -11,20 +12,24 @@ os.makedirs(data_folder, exist_ok=True)
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
-            # Получаем список файлов в папке /data
-            data_files = [f for f in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder, f))]
-
-            # Формируем HTML-код списка файлов
-            file_list_html = "<ul>"
-            for file in data_files:
-                file_list_html += f"<li><a href=\"/{file}\" download>{file}</a></li>"
-            file_list_html += "</ul>"
-
-            # Отправляем HTML-код страницы с кнопкой "Run Script" и списком файлов
             content = "<DOCTYPE html>"
-            content += f"<h1>Run Script</h1><button id=\"run-script-button\">Run Script</button>{file_list_html}<script src=\"/jquery-3.6.0.min.js\"></script><script>"
+            content += "<html><head><title>GrafanaGrab</title></head><body>"
+            content += "<h1 style='text-align: center;'>GrafanaGrab</h1>"
+            content += "<button id='run-script-button' style='position: absolute; left: 20px; top: 50px;'>Run Script</button>"
+            content += "<table style='width: 100%; border: 1px solid #ccc; border-collapse: collapse;'>"
+            content += "<tr><th style='border: 1px solid #ccc;'>File Name</th><th style='border: 1px solid #ccc;'>Date Created</th></tr>"
+
+            data_files = [f for f in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder, f))]
+            for file in data_files:
+                file_path = os.path.join(data_folder, file)
+                file_date = datetime.datetime.fromtimestamp(os.path.getctime(file_path)).strftime('%Y-%m-%d %H:%M:%S')
+                content += f"<tr><td style='border: 1px solid #ccc;'><a href=\"/{file}\" download>{file}</a></td><td style='border: 1px solid #ccc;'>{file_date}</td></tr>"
+
+            content += "</table>"
+            content += "<script src=\"/jquery-3.6.0.min.js\"></script><script>"
             content += "$(document).ready(function(){$('#run-script-button').click(function(event){event.preventDefault();$.ajax({url:'/run_script',type:'POST',success:function(response){alert('Script executed successfully.');},error:function(jqXHR,textStatus,errorThrown){alert('Error executing script: ' + textStatus);}});});});"
             content += "</script>"
+            content += "</body></html>"
             content = content.encode()
 
             self.send_response(200)
@@ -32,10 +37,8 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(content)
         elif self.path.startswith("/"):
-            # Получаем имя файла из пути запроса
             file_path = os.path.join(data_folder, urllib.parse.unquote(self.path[1:]))
 
-            # Отправляем файл для скачивания
             if os.path.isfile(file_path):
                 with open(file_path, "rb") as file:
                     content = file.read()
@@ -65,7 +68,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == "/run_script":
-            # Импортируем модуль main.py и вызываем функцию main()
             script_module = importlib.import_module("main")
             script_module.main()
 
