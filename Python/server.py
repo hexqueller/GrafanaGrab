@@ -1,10 +1,8 @@
 import config
-
 import http.server
 import urllib.parse
 import importlib
 import os
-
 
 # Путь к папке /data
 data_folder = config.save + "/data"
@@ -19,12 +17,12 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             # Формируем HTML-код списка файлов
             file_list_html = "<ul>"
             for file in data_files:
-                file_list_html += f"<li><a href=\"/home/alex/data/{file}\" download>{file}</a></li>"
+                file_list_html += f"<li><a href=\"/{file}\" download>{file}</a></li>"
             file_list_html += "</ul>"
 
             # Отправляем HTML-код страницы с кнопкой "Run Script" и списком файлов
-            content = "<!DOCTYPE html>"
-            content += f"<h1>Run Script</h1><button id=\"run-script-button\">Run Script</button>{file_list_html}<script src=\"/jquery-3.6.0.min.js\"></script><script>"
+            content = "<DOCTYPE html>"
+            content += f"<h1>Run Script</h1><button id=\"run-script-button\">Run Script</button>{file_list_html}<script src=\"https://code.jquery.com/jquery-3.6.0.min.js\"></script><script>"
             content += "$(document).ready(function(){$('#run-script-button').click(function(event){event.preventDefault();$.ajax({url:'/run_script',type:'POST',success:function(response){alert('Script executed successfully.');},error:function(jqXHR,textStatus,errorThrown){alert('Error executing script: ' + textStatus);}});});});"
             content += "</script>"
             content = content.encode()
@@ -33,9 +31,9 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             self.wfile.write(content)
-        elif self.path.startswith("/home/alex/data/"):
+        elif self.path.startswith("/"):
             # Получаем имя файла из пути запроса
-            file_path = os.path.join(data_folder, self.path[len("/home/alex/data/"):])
+            file_path = os.path.join(data_folder, self.path[1:])
 
             # Отправляем файл для скачивания
             if os.path.isfile(file_path):
