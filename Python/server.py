@@ -22,7 +22,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
             # Отправляем HTML-код страницы с кнопкой "Run Script" и списком файлов
             content = "<DOCTYPE html>"
-            content += f"<h1>Run Script</h1><button id=\"run-script-button\">Run Script</button>{file_list_html}<script src=\"https://code.jquery.com/jquery-3.6.0.min.js\"></script><script>"
+            content += f"<h1>Run Script</h1><button id=\"run-script-button\">Run Script</button>{file_list_html}<script src=\"/jquery-3.6.0.min.js\"></script><script>"
             content += "$(document).ready(function(){$('#run-script-button').click(function(event){event.preventDefault();$.ajax({url:'/run_script',type:'POST',success:function(response){alert('Script executed successfully.');},error:function(jqXHR,textStatus,errorThrown){alert('Error executing script: ' + textStatus);}});});});"
             content += "</script>"
             content = content.encode()
@@ -44,22 +44,22 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-Disposition", f"attachment; filename=\"{os.path.basename(file_path)}\"")
                 self.end_headers()
                 self.wfile.write(content)
-            else:
-                self.send_response(404)
-        elif self.path == "/favicon.ico":
-            with open("favicon.ico", "rb") as file:
-                content = file.read()
-            self.send_response(200)
-            self.send_header("Content-type", "image/x-icon")
-            self.end_headers()
-            self.wfile.write(content)
-        elif self.path == "/jquery-3.6.0.min.js":
-            with open("jquery-3.6.0.min.js", "rb") as file:
-                content = file.read()
-            self.send_response(200)
-            self.send_header("Content-type", "application/javascript")
-            self.end_headers()
-            self.wfile.write(content)
+            elif self.path == "/favicon.ico":
+                file_path = os.path.join(os.path.dirname(__file__), "favicon.ico")
+                with open(file_path, "rb") as file:
+                    content = file.read()
+                self.send_response(200)
+                self.send_header("Content-type", "image/x-icon")
+                self.end_headers()
+                self.wfile.write(content)
+            elif self.path == "/jquery-3.6.0.min.js":
+                file_path = os.path.join(os.path.dirname(__file__), "jquery-3.6.0.min.js")
+                with open(file_path, "rb") as file:
+                    content = file.read()
+                self.send_response(200)
+                self.send_header("Content-type", "application/javascript")
+                self.end_headers()
+                self.wfile.write(content)
         else:
             self.send_response(404)
 
