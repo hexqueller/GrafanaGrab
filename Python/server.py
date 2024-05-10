@@ -33,7 +33,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(content)
         elif self.path.startswith("/"):
             # Получаем имя файла из пути запроса
-            file_path = os.path.join(data_folder, self.path[1:])
+            file_path = os.path.join(data_folder, urllib.parse.unquote(self.path[1:]))
 
             # Отправляем файл для скачивания
             if os.path.isfile(file_path):
