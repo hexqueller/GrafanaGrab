@@ -1,4 +1,5 @@
 import config
+import logging0
 import http.server
 import urllib.parse
 import importlib
@@ -6,8 +7,7 @@ import os
 import datetime
 
 # Путь к папке /data
-data_folder = config.save + "/data"
-os.makedirs(data_folder, exist_ok=True)
+data_folder, filler = logging0.create_dir(config.save)
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -47,7 +47,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             content += "</div>"
 
             content += "<script src=\"/jquery-3.6.0.min.js\"></script><script>"
-            content += "$(document).ready(function(){$('#run-script-button').click(function(event){event.preventDefault();$.ajax({url:'/run_script',type:'POST',success:function(response){alert('Script executed successfully.');},error:function(jqXHR,textStatus,errorThrown){alert('Error executing script: ' + textStatus);}});});});"
+            content += "$(document).ready(function(){$('#run-script-button').click(function(event){event.preventDefault();$.ajax({url:'/run_script',type:'POST',success:function(response){alert('Успех');location.reload();},error:function(jqXHR,textStatus,errorThrown){alert('Ошибка: ' + textStatus);}});});});"
             content += "</script>"
             content += "</body></html>"
             content = content.encode("utf-8")

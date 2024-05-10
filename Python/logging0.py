@@ -16,7 +16,7 @@ def check_log_file(path):
             file.write(f"{greetings}")
     else:
         with open(file_path, 'a') as file:
-            file.write(f"\n\n{greetings}")
+            file.write(f"\n\n{greetings}\n")
     return file_path
 
 def logging(log_file, string_to_append):
