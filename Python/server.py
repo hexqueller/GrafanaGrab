@@ -13,27 +13,47 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
             content = "<DOCTYPE html>"
-            content += "<html><head><title>GrafanaGrab</title></head><body>"
+            content += "<html><head><title>GrafanaGrab</title>"
+            content += "<meta charset='UTF-8'>"
+            content += "<style>"
+            content += "body { font-family: Arial, sans-serif; background-color: #111111; color: #fff; }"
+            content += "h1 { margin-bottom: 20px; color: #fff; }"
+            content += "table { margin-bottom: 20px; border-collapse: collapse; border: 1px solid #337ab7; }"
+            content += "table th, table td { padding: 10px; text-align: center; border: 1px solid #337ab7; }"
+            content += "table tr:nth-child(2n+1) { background-color: #333; }"
+            content += "table tr:nth-child(2n) { background-color: #2f3640; }"
+            content += "table th { background-color: #337ab7; color: #fff; font-size: 12px; padding: 5px; }"
+            content += "#log-window { width: 100%; height: 300px; overflow-y: scroll; border: 1px solid #337ab7; padding: 10px; background-color: #333; color: #fff; }"
+            content += "#run-script-button { background-color: #337ab7; color: #fff; padding: 10px 20px; border: none; border-radius: 0; font-size: 16px; cursor: pointer; }"
+            content += "#run-script-button:hover { background-color: #23527c; }"
+            content += "</style>"
+            content += "</head><body>"
             content += "<h1 style='text-align: center;'>GrafanaGrab</h1>"
-            content += "<button id='run-script-button' style='position: absolute; left: 20px; top: 50px;'>Run Script</button>"
-            content += "<table style='width: 100%; border: 1px solid #ccc; border-collapse: collapse;'>"
-            content += "<tr><th style='border: 1px solid #ccc;'>File Name</th><th style='border: 1px solid #ccc;'>Date Created</th></tr>"
+            content += "<table style='width: 100%;'>"
+            content += "<tr><th style='border: 1px solid #337ab7; font-size: 12px; padding: 5px;'>File Name</th><th style='border: 1px solid #337ab7; font-size: 12px; padding: 5px;'>Date Created</th></tr>"
 
-            data_files = [f for f in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder, f))]
+            data_files = [f for f in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder, f)) and f != "log.txt"]
             for file in data_files:
                 file_path = os.path.join(data_folder, file)
-                file_date = datetime.datetime.fromtimestamp(os.path.getctime(file_path)).strftime('%Y-%m-%d %H:%M:%S')
-                content += f"<tr><td style='border: 1px solid #ccc;'><a href=\"/{file}\" download>{file}</a></td><td style='border: 1px solid #ccc;'>{file_date}</td></tr>"
+                file_date = datetime.datetime.fromtimestamp(os.path.getctime(file_path)).strftime('%H:%M %d.%m.%Y')
+                content += f"<tr><td style='border: 1px solid #337ab7;'><a href=\"/{file}\" download style='color: #fff'>{file}</a></td><td style='border: 1px solid #337ab7; text-align: center;'>{file_date}</td></tr>"
 
             content += "</table>"
+            content += "<button id='run-script-button' style='position: relative; left: 20px; top: 20px; margin-top: 20px;'>Обновить</button>"
+            content += "<div id='log-window'>"
+            with open(os.path.join(data_folder, "log.txt"), "r", encoding="utf-8") as log_file:
+                log_content = log_file.read()
+                content += f"<pre>{log_content}</pre>"
+            content += "</div>"
+
             content += "<script src=\"/jquery-3.6.0.min.js\"></script><script>"
             content += "$(document).ready(function(){$('#run-script-button').click(function(event){event.preventDefault();$.ajax({url:'/run_script',type:'POST',success:function(response){alert('Script executed successfully.');},error:function(jqXHR,textStatus,errorThrown){alert('Error executing script: ' + textStatus);}});});});"
             content += "</script>"
             content += "</body></html>"
-            content = content.encode()
+            content = content.encode("utf-8")
 
             self.send_response(200)
-            self.send_header("Content-type", "text/html")
+            self.send_header("Content-type", "text/html; charset=UTF-8")
             self.end_headers()
             self.wfile.write(content)
         elif self.path.startswith("/"):
