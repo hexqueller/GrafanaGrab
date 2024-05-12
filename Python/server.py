@@ -16,19 +16,23 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             content += "<html><head><title>GrafanaGrab</title>"
             content += "<meta charset='UTF-8'>"
             content += "<style>"
-            content += "body { font-family: Arial, sans-serif; background-color: #111111; color: #fff; }"
+            content += "body { font-family: Arial, sans-serif; background-color: #111111; color: #fff; text-align: center; }"
             content += "h1 { margin-bottom: 20px; color: #fff; }"
-            content += "table { margin-bottom: 20px; border-collapse: collapse; border: 1px solid #337ab7; }"
+            content += "table { width: 100%; margin: 0 auto; border-collapse: collapse; border: 1px solid #337ab7; }"
             content += "table th, table td { padding: 10px; text-align: center; border: 1px solid #337ab7; }"
             content += "table tr:nth-child(2n+1) { background-color: #333; }"
             content += "table tr:nth-child(2n) { background-color: #2f3640; }"
             content += "table th { background-color: #337ab7; color: #fff; font-size: 12px; padding: 5px; }"
-            content += "#log-window { width: 100%; height: 300px; overflow-y: scroll; border: 1px solid #337ab7; padding: 10px; background-color: #333; color: #fff; }"
-            content += "#run-script-button { background-color: #337ab7; color: #fff; padding: 10px 20px; border: none; border-radius: 0; font-size: 16px; cursor: pointer; }"
+            content += "#log-window { width: 100%; height: 300px; overflow-y: scroll; border: 1px solid #337ab7; padding: 10px; background-color: #333; color: #fff; margin: 20px auto; }"
+            content += "#run-script-button { background-color: #337ab7; color: #fff; padding: 10px 20px; border: none; border-radius: 0; font-size: 16px; cursor: pointer; margin-top: 0; margin-left: 0; float: left; }"
             content += "#run-script-button:hover { background-color: #23527c; }"
             content += "</style>"
             content += "</head><body>"
             content += "<h1 style='text-align: center;'>GrafanaGrab</h1>"
+            content += "<div style='display: flex; flex-direction: row; justify-content: space-between;'>"
+            content += "<div style='width: 20%;'></div>"
+            content += "<div style='width: 60%;'>"
+            content += "<button id='run-script-button' style='margin: 10px; float: left;'>Обновить</button>"
             content += "<table style='width: 100%;'>"
             content += "<tr><th style='border: 1px solid #337ab7; font-size: 12px; padding: 5px;'>File Name</th><th style='border: 1px solid #337ab7; font-size: 12px; padding: 5px;'>Date Created</th></tr>"
 
@@ -39,7 +43,10 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 content += f"<tr><td style='border: 1px solid #337ab7;'><a href=\"/{file}\" download style='color: #fff'>{file}</a></td><td style='border: 1px solid #337ab7; text-align: center;'>{file_date}</td></tr>"
 
             content += "</table>"
-            content += "<button id='run-script-button' style='position: relative; left: 20px; top: 20px; margin-top: 20px;'>Обновить</button>"
+            content += "</div>"
+            content += "<div style='width: 20%;'></div>"
+            content += "</div>"
+
             content += "<div id='log-window'>"
             with open(os.path.join(data_folder, "log.txt"), "r", encoding="utf-8") as log_file:
                 log_content = log_file.read()
@@ -75,32 +82,15 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-type", "image/x-icon")
                 self.end_headers()
                 self.wfile.write(content)
-            elif self.path == "/jquery-3.6.0.min.js":
-                file_path = os.path.join(os.path.dirname(__file__), "jquery-3.6.0.min.js")
-                with open(file_path, "rb") as file:
-                    content = file.read()
-                self.send_response(200)
-                self.send_header("Content-type", "application/javascript")
+            else:
+                self.send_response(404)
                 self.end_headers()
-                self.wfile.write(content)
-        else:
-            self.send_response(404)
+                self.wfile.write(b"Not Found")
 
-    def do_POST(self):
-        if self.path == "/run_script":
-            script_module = importlib.import_module("main")
-            script_module.main()
-
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.send_header("Refresh", "0")
-            self.end_headers()
-            self.wfile.write(b"Script executed successfully.")
-        else:
-            self.send_response(404)
+def run_server():
+    httpd = http.server.HTTPServer(("localhost", 8000), CustomHandler)
+    print("Server started on port 8000...")
+    httpd.serve_forever()
 
 if __name__ == "__main__":
-    server_address = ("", 8000)
-    httpd = http.server.HTTPServer(server_address, CustomHandler)
-    print(f"Starting server on http://localhost:8000")
-    httpd.serve_forever()
+    run_server()
