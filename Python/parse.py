@@ -29,5 +29,5 @@ def get_dashboard_update_all(dashboard_json):
     updated_by = get_dashboard_update_by(dashboard_json)
     updated_date = get_dashboard_update_date(dashboard_json)
     version = f"Версия: {get_dashboard_ver(dashboard_json)}"
-    fmt = "{title:<50} {updated_by:<15} {updated_date:<20} {version:<10}"
+    fmt = "{title:<30} {updated_by:<15} {updated_date:<20} {version:<10}"
     return fmt.format(title=title, updated_by=updated_by, updated_date=updated_date, version=version)

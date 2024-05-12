@@ -94,7 +94,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(404)
                 self.end_headers()
                 self.wfile.write(b"Not Found")
-                
+
     def do_POST(self):
             if self.path == "/run_script":
                 script_module = importlib.import_module("main")
