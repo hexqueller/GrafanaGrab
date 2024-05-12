@@ -20,15 +20,11 @@ if config.key == "":
         print("Ключ не прописан в config.py или не указан в качестве аргумента")
         exit()
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
 now = datetime.now()
 date_format = now.strftime("%d-%m-%Y")
 archive_name = f"dashboards_{date_format}.tar.gz"
 
-if config.save == "":
-    config.save = os.path.join(script_dir, archive_name)
-else:
-    config.save = config.save + "/" + archive_name
+config.save = config.save + "/" + archive_name
 
 def main():
     error_count = 0

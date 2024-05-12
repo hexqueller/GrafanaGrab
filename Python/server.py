@@ -7,7 +7,8 @@ import os
 import datetime
 
 # Путь к папке /data
-data_folder, filler = logging0.create_dir(config.save)
+data_folder, log_path = logging0.create_dir(config.save)
+print(f"Путь к логам: {log_path}")
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
