@@ -1,6 +1,9 @@
 import os
 import datetime
 
+def log_new_line(text, dots=10):
+    return "-"*dots + text + " " + datetime.datetime.now().strftime("%H:%M %d.%m.%Y") + "-"*dots
+
 def create_dir(script_dir):
     folder = "/data"
     os.makedirs(script_dir+folder, exist_ok=True)
@@ -9,14 +12,13 @@ def create_dir(script_dir):
 
 def check_log_file(path):
     file = "/log.txt"
-    greetings = "-"*10 + "запуск " + datetime.datetime.now().strftime("%H:%M %d.%m.%Y") + "-"*10
     file_path = path + file
     if not os.path.isfile(file_path):
         with open(file_path, 'w') as file:
-            file.write(f"{greetings}")
+            file.write(log_new_line("создан"))
     else:
         with open(file_path, 'a') as file:
-            file.write(f"\n\n{greetings}\n")
+            file.write(f"\n\n{log_new_line("запуск")}\n")
     return file_path
 
 def logging(log_file, string_to_append):

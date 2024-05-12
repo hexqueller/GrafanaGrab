@@ -82,14 +82,36 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-type", "image/x-icon")
                 self.end_headers()
                 self.wfile.write(content)
+            elif self.path == "/jquery-3.6.0.min.js":
+                file_path = os.path.join(os.path.dirname(__file__), "jquery-3.6.0.min.js")
+                with open(file_path, "rb") as file:
+                    content = file.read()
+                self.send_response(200)
+                self.send_header("Content-type", "application/javascript")
+                self.end_headers()
+                self.wfile.write(content)
             else:
                 self.send_response(404)
                 self.end_headers()
                 self.wfile.write(b"Not Found")
+                
+    def do_POST(self):
+            if self.path == "/run_script":
+                script_module = importlib.import_module("main")
+                script_module.main()
+
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain")
+                self.send_header("Refresh", "0")
+                self.end_headers()
+                self.wfile.write(b"Script executed successfully.")
+            else:
+                self.send_response(404)
 
 def run_server():
-    httpd = http.server.HTTPServer(("localhost", 8000), CustomHandler)
-    print("Server started on port 8000...")
+    port = 8000
+    httpd = http.server.HTTPServer(("localhost", port), CustomHandler)
+    print(f"Server started on port {port}...")
     httpd.serve_forever()
 
 if __name__ == "__main__":
