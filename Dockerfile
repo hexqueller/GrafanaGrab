@@ -9,4 +9,6 @@ RUN pip install --no-cache-dir requests
 CMD ["python", "server.py"]
 
 
-# docker run --net=host grafanagrab
+# docker build -t grafanagrab .
+# docker run --net=host grafanagrab 
+# result: SIZE: 1.03GB 0_o
