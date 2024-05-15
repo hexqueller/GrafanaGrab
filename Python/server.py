@@ -8,7 +8,7 @@ import datetime
 
 # Путь к папке /data
 data_folder, log_path = logging0.create_dir(config.save)
-print(f"Путь к логам: {log_path}")
+print("Путь к логам: {}".format(log_path))
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -41,7 +41,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             for file in data_files:
                 file_path = os.path.join(data_folder, file)
                 file_date = datetime.datetime.fromtimestamp(os.path.getctime(file_path)).strftime('%H:%M %d.%m.%Y')
-                content += f"<tr><td style='border: 1px solid #337ab7;'><a href=\"/{file}\" download style='color: #fff'>{file}</a></td><td style='border: 1px solid #337ab7; text-align: center;'>{file_date}</td></tr>"
+                content += "<tr><td style='border: 1px solid #337ab7;'><a href=\"/{0}\" download style='color: #fff'>{0}</a></td><td style='border: 1px solid #337ab7; text-align: center;'>{1}</td></tr>".format(file, file_date)
 
             content += "</table>"
             content += "</div>"
@@ -51,7 +51,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             content += "<div id='log-window'>"
             with open(os.path.join(data_folder, "log.txt"), "r", encoding="utf-8") as log_file:
                 log_content = log_file.read()
-                content += f"<pre>{log_content}</pre>"
+                content += "<pre>{}</pre>".format(log_content)
             content += "</div>"
 
             content += "<script src=\"/jquery-3.6.0.min.js\"></script><script>"
@@ -72,7 +72,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                     content = file.read()
                 self.send_response(200)
                 self.send_header("Content-type", "application/octet-stream")
-                self.send_header("Content-Disposition", f"attachment; filename=\"{os.path.basename(file_path)}\"")
+                self.send_header("Content-Disposition", "attachment; filename=\"{0}\"".format(os.path.basename(file_path)))
                 self.end_headers()
                 self.wfile.write(content)
             elif self.path == "/favicon.ico":
@@ -112,7 +112,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 def run_server():
     port = config.port
     httpd = http.server.HTTPServer(("localhost", port), CustomHandler)
-    print(f"Server started on port {port}...")
+    print("Server started on port {}...".format(port))
     httpd.serve_forever()
 
 if __name__ == "__main__":

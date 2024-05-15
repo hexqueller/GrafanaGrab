@@ -7,7 +7,7 @@ def log_new_line(text, dots=10):
 def create_dir(script_dir):
     folder = "/data"
     os.makedirs(script_dir+folder, exist_ok=True)
-    log_file = check_log_file(script_dir+folder)
+    log_file = check_log_file("{0}{1}".format(script_dir, folder))
     return script_dir+folder, log_file
 
 def check_log_file(path):
@@ -18,7 +18,7 @@ def check_log_file(path):
             file.write(log_new_line("создан"))
     else:
         with open(file_path, 'a') as file:
-            file.write(f"\n\n{log_new_line("запуск")}\n")
+            file.write("\n\n{0}\n".format(log_new_line("запуск")))
     return file_path
 
 def logging(log_file, string_to_append):
