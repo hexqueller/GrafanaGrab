@@ -1,5 +1,11 @@
 # docker build -t grafanagrab .
-# docker run --net=host grafanagrab 
+# docker run \
+    # --name grafanagrab
+    # --net=host \
+    # -v ${PWD}:/data\
+    # -d \
+    # grafanagrab
+
 
 FROM alpine:latest
 
