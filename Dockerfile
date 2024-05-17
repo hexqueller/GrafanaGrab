@@ -4,6 +4,7 @@
     # --net=host \
     # -v ${PWD}:/data\
     # -d \
+    # --rm \
     # grafanagrab
 
 
