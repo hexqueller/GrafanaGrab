@@ -9,6 +9,9 @@ import os
 import tarfile
 from datetime import datetime
 
+def fix_path_error(text):
+    return text.replace("/", "-")
+
 if config.url == "":
     print("Не указан { url } в config.py")
     exit()
@@ -54,7 +57,7 @@ def main():
 
         if response.status_code == 200:
             dashboard_json = response.json()
-            dashboard_title = "{0}_ver_{1}".format(parse.get_dashboard_title(dashboard_json), parse.get_dashboard_ver(dashboard_json))
+            dashboard_title = "{0}_ver_{1}".format(fix_path_error(parse.get_dashboard_title(dashboard_json)), parse.get_dashboard_ver(dashboard_json))
             logging0.logging(log_file, parse.get_dashboard_update_all(dashboard_json))
             if not dashboard_title:
                 print("Не удалось получить заголовок дашборда для {0}. Будет использовано имя по умолчанию.".format(dashboard))

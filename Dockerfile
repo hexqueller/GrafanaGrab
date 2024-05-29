@@ -1,8 +1,8 @@
-# docker build -t grafanagrab .
+# docker build . -t grafanagrab
 # docker run \
     # --name grafanagrab
     # --net=host \
-    # -v ${PWD}:/data\
+    # -v ${PWD}:/app/data
     # -d \
     # --rm \
     # grafanagrab
