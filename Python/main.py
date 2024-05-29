@@ -54,23 +54,25 @@ def main():
             "{0}/api/dashboards/uid/{1}".format(config.url, dashboard),
             headers=headers,
         )
-
-        if response.status_code == 200:
-            dashboard_json = response.json()
-            dashboard_title = "{0}_ver_{1}".format(fix_path_error(parse.get_dashboard_title(dashboard_json)), parse.get_dashboard_ver(dashboard_json))
-            logging0.logging(log_file, parse.get_dashboard_update_all(dashboard_json))
-            if not dashboard_title:
-                print("Не удалось получить заголовок дашборда для {0}. Будет использовано имя по умолчанию.".format(dashboard))
-                dashboard_title = "dashboard"
-            filename = "{0}.json".format(dashboard_title)
-            dashboard_json_converted = parse.convert_to_import_format(dashboard_json)
-            with open(os.path.join(output_folder, filename), "w") as outfile:
-                json.dump(dashboard_json_converted, outfile, indent=4)
-                print("Дашборд {0} успешно экспортирован как {1}.".format(dashboard, filename))
-        else:
-            print("Ошибка при экспорте дашборда: {0} {1}".format(response.status_code, response.text))
+        try:
+            if response.status_code == 200:
+                dashboard_json = response.json()
+                dashboard_title = "{0}_ver_{1}".format(fix_path_error(parse.get_dashboard_title(dashboard_json)), parse.get_dashboard_ver(dashboard_json))
+                logging0.logging(log_file, parse.get_dashboard_update_all(dashboard_json))
+                if not dashboard_title:
+                    print("Не удалось получить заголовок дашборда для {0}. Будет использовано имя по умолчанию.".format(dashboard))
+                    dashboard_title = "dashboard"
+                filename = "{0}.json".format(dashboard_title)
+                dashboard_json_converted = parse.convert_to_import_format(dashboard_json)
+                with open(os.path.join(output_folder, filename), "w") as outfile:
+                    json.dump(dashboard_json_converted, outfile, indent=4)
+                    print("Дашборд {0} успешно экспортирован как {1}.".format(dashboard, filename))
+            else:
+                print("Ошибка при экспорте дашборда: {0} {1}".format(response.status_code, response.text))
+                error_count += 1
+        except:
             error_count += 1
-
+            
     print("\nДашборды успешно экспортированны!\nУспешно: {0}\nОшибок: {1}".format(len(uids), error_count))
 
     with tarfile.open(config.save, "w:gz") as tar:
