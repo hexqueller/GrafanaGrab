@@ -21,7 +21,10 @@ def get_dashboard_update_date(dashboard_json):
     try:
         converted_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").strftime("%H:%M:%S %d-%m-%Y")
     except ValueError:
-        converted_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z").strftime("%H:%M:%S %d-%m-%Y")
+        try:
+            converted_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z").strftime("%H:%M:%S %d-%m-%Y")
+        except ValueError:
+            return date
     return converted_date
 
 def get_dashboard_update_all(dashboard_json):
