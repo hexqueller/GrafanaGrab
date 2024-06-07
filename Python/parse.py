@@ -8,7 +8,11 @@ def convert_to_import_format(dashboard_json):
     return dashboard_json["dashboard"]
 
 def get_dashboard_title(dashboard_json):
-    return dashboard_json.get("dashboard", {}).get("title", "")
+    title = dashboard_json.get("dashboard", {}).get("title", "")
+    if len(title) >= 37:
+        return title[0:35] + "..."
+    else: 
+        return title
 
 def get_dashboard_ver(dashboard_json):
     return dashboard_json.get("dashboard", {}).get("version", "")
@@ -32,5 +36,5 @@ def get_dashboard_update_all(dashboard_json):
     updated_by = get_dashboard_update_by(dashboard_json)
     updated_date = get_dashboard_update_date(dashboard_json)
     version = f"Версия: {get_dashboard_ver(dashboard_json)}"
-    fmt = "{title:<30} {updated_by:<15} {updated_date:<20} {version:<10}"
+    fmt = "{title:<40} {updated_by:<15} {updated_date:<20} {version:<10}"
     return fmt.format(title=title, updated_by=updated_by, updated_date=updated_date, version=version)
