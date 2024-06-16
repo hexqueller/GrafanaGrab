@@ -69,6 +69,7 @@ def main():
                     print("Дашборд {0} успешно экспортирован как {1}.".format(dashboard, filename))
             else:
                 print("Ошибка при экспорте дашборда: {0} {1}".format(response.status_code, response.text))
+                logging0.logging(log_file, "Ошибка при экспорте дашборда: {0} {1}".format(response.status_code, response.text))
                 error_count += 1
         except:
             error_count += 1
