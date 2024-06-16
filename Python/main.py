@@ -72,6 +72,7 @@ def main():
                 logging0.logging(log_file, "Ошибка при экспорте дашборда: {0} {1}".format(response.status_code, response.text))
                 error_count += 1
         except:
+            logging0.logging(log_file, "Сработал except!")
             error_count += 1
             
     print("\nДашборды успешно экспортированны!\nУспешно: {0}\nОшибок: {1}".format(len(uids), error_count))
