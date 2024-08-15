@@ -1,4 +1,9 @@
 # Grafana Dashboards Exporter
+![Image alt](https://github.com/V1RUSnya/GrafanaGrab/blob/main/image/screenshot.png)
+
+
+Dockerhub image: hexqueller/grafanagrab:latest
+
 
 Этот репозиторий содержит два скрипта для экспорта дашбордов Grafana с помощью их API: Python-версию и bash-версию. Скрипты сохраняют дашборды в формате JSON и архивируют их.
 

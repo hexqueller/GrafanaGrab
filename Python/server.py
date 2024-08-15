@@ -111,7 +111,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
 def run_server():
     port = config.port
-    httpd = http.server.HTTPServer(("localhost", port), CustomHandler)
+    httpd = http.server.HTTPServer(("0.0.0.0", port), CustomHandler)
     print("Server started on port {}...".format(port))
     httpd.serve_forever()
 
