@@ -66,7 +66,3 @@ Dockerhub image: hexqueller/grafanagrab:latest
 2. Скрипт экспортирует все дашборды из вашего экземпляра Grafana в папку `/tmp/dashboards`.
 3. После успешного экспорта скрипт архивирует папку `/tmp/dashboards` в формате `dashboards_DD-MM-YYYY.tar.gz` и сохраняет архив в указанной директории `SAVE_PATH`.
 4. Скрипт удаляет папку `/tmp/dashboards` после создания архива.
-
-## Автор
-
-[TG: BesedinDV](https://t.me/BesedinDV)
